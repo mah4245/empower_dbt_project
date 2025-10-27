@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: dd_dwh      # dbt source name
+    database: OLP
+    schema: DD_DWH     # actual schema in Synapse
+    tables:
+      - name: ORDER_INVOICE
+      - name: PARTY_ORGANIZATION
+      - name: ITEM
+      - name: CUSTOMER_JOURNEY_PROPOSALS
+      - name: PARTY_CONTACT 
+      - name: CAMPAIGN     
+      - name: FORECAST
+      - name: CUSTOMER_JOURNEY_APPOINTMENTS
+
+  - name: prod_bk
+    database: OLP
+    schema: PROD_BK
+    tables:
+      - name: SM_DELETION_EVENTS

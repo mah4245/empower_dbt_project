@@ -1,0 +1,15 @@
+# dbt build outputs
+target/
+dbt_packages/
+logs/
+
+# Python virtual environment
+.env/
+.venv/
+dbt_env/
+dbt_empower/
+
+# System files
+*.pyc
+__pycache__/
+.DS_Store

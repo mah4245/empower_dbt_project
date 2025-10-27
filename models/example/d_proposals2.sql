@@ -1,0 +1,20 @@
+{{ config(materialized='table') }}
+
+WITH base_proposals AS (
+    SELECT DISTINCT
+        PROP.CJ_INTERNAL_PROP_ID AS PROPOSAL_ID,
+        PROP.CJ_PROP_INTERNAL_ORGANIZATION_PARTY_ID AS STORE_ID,
+        PROP.CJ_PROP_INTERNAL_CUSTOMER_PARTY_ID AS LEAD_ID,
+        PROP.CJ_SERVICE_NAME AS SERVICE,
+        PROP.CJ_REVENUE_CATEGORY AS REVENUE_CATEGORY,
+        PROP.CJ_PROP_TYPE AS TYPE,
+        PROP.CJ_PROP_TITLE AS PROPOSAL_TITLE,
+        PROP.CJ_PROP_OWNER AS TEAM_MEMBER
+    FROM {{ source('dd_dwh', 'CUSTOMER_JOURNEY_PROPOSALS') }} AS PROP
+    {{ join_active_party_org('PROP', 'CJ_PROP_INTERNAL_ORGANIZATION_PARTY_ID') }}
+    WHERE {{ exclude_invalid_organizations('PO.PO_INTERNAL_NAME') }}
+)
+
+SELECT *
+FROM base_proposals
+WHERE {{ exclude_deleted_records('PROPOSAL_ID', 2) }}
