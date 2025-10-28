@@ -57,8 +57,9 @@ jobs:
                 client_secret: "${{ secrets.AZURE_CLIENT_SECRET }}"
                 tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
           EOL
- 
-     
+
+          echo "------ profiles.yml created ------"
+          cat ~/.dbt/profiles.yml
       - name: Run dbt tests
         run: |
           dbt debug --target dev
