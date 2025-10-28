@@ -57,28 +57,28 @@ empower_project:
 
         $content | Out-File -FilePath ci_profiles/profiles.yml -Encoding utf8
 
-          - name: Verify profiles file
-            shell: pwsh
-            run: |
-              Write-Host "Created file:"
-              Get-Content ci_profiles/profiles.yml
+        - name: Verify profiles file
+        shell: pwsh
+        run: |
+          Write-Host "Created file:"
+          Get-Content ci_profiles/profiles.yml
 
-            - name: Run dbt debug
-              shell: pwsh
-              run: |
-                dbt debug --profiles-dir ./ci_profiles
+        - name: Run dbt debug
+          shell: pwsh
+          run: |
+            dbt debug --profiles-dir ./ci_profiles
 
-            - name: Run dbt deps
-              shell: pwsh
-              run: |
-                dbt deps --profiles-dir ./ci_profiles
+        - name: Run dbt deps
+          shell: pwsh
+          run: |
+            dbt deps --profiles-dir ./ci_profiles
 
-            - name: Run dbt run
-              shell: pwsh
-              run: |
-                dbt run --profiles-dir ./ci_profiles
+        - name: Run dbt run
+          shell: pwsh
+          run: |
+            dbt run --profiles-dir ./ci_profiles
 
-            - name: Run dbt test
-              shell: pwsh
-              run: |
-                dbt test --profiles-dir ./ci_profiles
+        - name: Run dbt test
+          shell: pwsh
+          run: |
+            dbt test --profiles-dir ./ci_profiles
