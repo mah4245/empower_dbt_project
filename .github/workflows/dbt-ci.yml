@@ -8,10 +8,7 @@ on:
 
 jobs:
   run-dbt-tests:
-    runs-on: windows-latest
-
-    env:
-      DBT_PROFILES_DIR: ./ci_profiles
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -22,22 +19,26 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
-        shell: pwsh
+      - name: Install ODBC Driver 18 for SQL Server
         run: |
-          python -m pip install --upgrade pip
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
+
+      - name: Install dbt
+        run: |
           pip install dbt-core dbt-synapse
+          dbt --version
 
-      - name: Create dbt profiles.yml
-        shell: pwsh
+      - name: Configure dbt profile
         run: |
-          mkdir ci_profiles -Force | Out-Null
-
-          $content = @"
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOL
 empower_project:
   target: dev
   outputs:
-  dev:
+    dev:
       type: synapse
       driver: ODBC Driver 18 for SQL Server
       server: eb-outdoorlightingperspective-workspace.sql.azuresynapse.net
@@ -48,38 +49,13 @@ empower_project:
       trust_cert: true
       threads: 1
       authentication: ActiveDirectoryServicePrincipal
-      client_id: ${{ secrets.AZURE_CLIENT_ID }}
-      client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-      tenant_id: ${{ secrets.AZURE_TENANT_ID }}"@
-          $content | Out-File -FilePath ci_profiles/profiles.yml -Encoding utf8
+      client_id: "${{ secrets.AZURE_CLIENT_ID }}"
+      client_secret: "${{ secrets.AZURE_CLIENT_SECRET }}"
+      tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
+      
+      EOL
 
-      - name: Verify profiles file
-        shell: pwsh
+      - name: Run dbt tests
         run: |
-          Write-Host "Created file:"
-          Get-Content ci_profiles/profiles.yml
-
-      - name: Validate YAML syntax
-        shell: pwsh
-        run: |
-          python -c "import yaml, sys; yaml.safe_load(open('ci_profiles/profiles.yml'))" || exit 1
-
-      - name: Run dbt debug
-        shell: pwsh
-        run: |
-          dbt debug --profiles-dir ./ci_profiles
-
-      - name: Run dbt deps
-        shell: pwsh
-        run: |
-          dbt deps --profiles-dir ./ci_profiles
-
-      - name: Run dbt run
-        shell: pwsh
-        run: |
-          dbt run --profiles-dir ./ci_profiles
-
-      - name: Run dbt test
-        shell: pwsh
-        run: |
-          dbt test --profiles-dir ./ci_profiles
+          dbt debug --target dev
+          dbt test --target dev
