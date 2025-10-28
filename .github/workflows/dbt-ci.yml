@@ -8,7 +8,7 @@ on:
 
 jobs:
   run-dbt-tests:
-    runs-on: Windows 10
+    runs-on: windows-latest
 
     env:
       DBT_PROFILES_DIR: ./ci_profiles  
