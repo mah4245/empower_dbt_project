@@ -28,7 +28,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install dbt-core dbt-synapse
 
-         - name: Create dbt profiles.yml
+      - name: Create dbt profiles.yml
         shell: pwsh
         run: |
           # create folder
