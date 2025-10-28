@@ -35,7 +35,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path ci_profiles | Out-Null
 
           # create profiles.yml using a PowerShell here-string
-          $content = @'
+          $content = '
 empower_project:
   target: dev
   outputs:
@@ -53,6 +53,4 @@ empower_project:
       client_id: ${{ secrets.AZURE_CLIENT_ID }}
       client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-'@
-
-          $content | Out-File -FilePath ci_profiles/profiles.yml -Encoding utf8
+'
