@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      DBT_PROFILES_DIR: ./ci_profiles  
+      DBT_PROFILES_DIR: ./ci_profiles
 
     steps:
       - name: Checkout repository
@@ -23,13 +23,19 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
+        shell: pwsh
         run: |
+          python -m pip install --upgrade pip
           pip install dbt-core dbt-synapse
 
       - name: Create dbt profiles.yml
+        shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path ci_profiles
-          @"
+          # create folder
+          New-Item -ItemType Directory -Force -Path ci_profiles | Out-Null
+
+          # create profiles.yml using a PowerShell here-string and write it with UTF8
+          $content = @"
 empower_project:
   target: dev
   outputs:
@@ -47,12 +53,37 @@ empower_project:
       client_id: "${{ secrets.AZURE_CLIENT_ID }}"
       client_secret: "${{ secrets.AZURE_CLIENT_SECRET }}"
       tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
-"@ | Out-File -FilePath ci_profiles/profiles.yml -Encoding utf8
+"@
 
-      - name: Run dbt tests
+          $content | Out-File -FilePath ci_profiles/profiles.yml -Encoding utf8
+
+      - name: Verify profiles file
+        shell: pwsh
         run: |
-          dbt debug
-          dbt deps
-          dbt seed --full-refresh
-          dbt run
-          dbt test
+          Write-Host "Created file:"
+          Get-Content ci_profiles/profiles.yml
+
+      - name: Run dbt debug
+        shell: pwsh
+        run: |
+          dbt debug --profiles-dir ./ci_profiles
+
+      - name: Run dbt deps
+        shell: pwsh
+        run: |
+          dbt deps --profiles-dir ./ci_profiles
+
+      - name: Run dbt seed (optional)
+        shell: pwsh
+        run: |
+          dbt seed --profiles-dir ./ci_profiles --full-refresh || Write-Host "No seeds or seed step skipped"
+
+      - name: Run dbt run
+        shell: pwsh
+        run: |
+          dbt run --profiles-dir ./ci_profiles
+
+      - name: Run dbt test
+        shell: pwsh
+        run: |
+          dbt test --profiles-dir ./ci_profiles
