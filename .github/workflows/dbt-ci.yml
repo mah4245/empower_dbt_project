@@ -45,11 +45,11 @@ jobs:
             outputs:
               dev:
                 type: synapse
-                driver: ODBC Driver 18 for SQL Server
-                server: eb-outdoorlightingperspective-workspace.sql.azuresynapse.net
+                driver: "ODBC Driver 18 for SQL Server"
+                server: "eb-outdoorlightingperspective-workspace.sql.azuresynapse.net"
                 port: 1433
-                database: OLP
-                schema: DBT_SL
+                database: "OLP"
+                schema: "DBT_SL"
                 encrypt: true
                 trust_cert: true
                 threads: 1
