@@ -37,7 +37,7 @@ jobs:
 empower_project:
   target: dev
   outputs:
-    dev:
+  dev:
       type: synapse
       driver: ODBC Driver 18 for SQL Server
       server: eb-outdoorlightingperspective-workspace.sql.azuresynapse.net
