@@ -55,3 +55,4 @@ empower_project:
       tenant_id: ${{ secrets.AZURE_TENANT_ID }}
 '@
 
+          $content | Out-File -FilePath ci_profiles/profiles.yml -Encoding utf8
