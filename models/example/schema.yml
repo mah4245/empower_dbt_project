@@ -2,34 +2,12 @@
 version: 2
 
 models:
-  - name: my_first_dbt_model
-    description: "A starter dbt model"
-    columns:
-      - name: id
-        description: "The primary key for this table"
-        data_tests:
-          - unique
-          - not_null
-
-  - name: my_second_dbt_model
-    description: "A starter dbt model"
-    columns:
-      - name: id
-        description: "The primary key for this table"
-        data_tests:
-          - unique
-          - not_null
-
-
-
-
   - name: d_invoice_status
     description: "Replicates active invoice status into DBT_SL layer, excluding deleted or invalid records."
     columns:
       - name: INVOICE_ID
         description: "Unique identifier for each invoice."
         data_tests:
-          - unique
           - not_null
       - name: STATUS
         description: "Current status of the invoice."
