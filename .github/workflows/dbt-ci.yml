@@ -1,0 +1,65 @@
+name: dbt CI Pipeline 
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+ 
+jobs:
+  dbt-tests:
+    name: Run dbt tests only
+    runs-on: ubuntu-latest
+ 
+    steps:
+     
+      - name: Checkout repository
+        uses: actions/checkout@v4
+ 
+     
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+ 
+     
+      - name: Install ODBC Driver 18 for SQL Server
+        run: |
+          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+          curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
+          sudo apt-get update
+          sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
+ 
+     
+      - name: Install dbt
+        run: |
+          pip install dbt-core dbt-synapse
+          dbt --version
+ 
+     
+      - name: Configure dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOL
+          empower_project:
+            target: dev
+            outputs:
+              dev:
+                type: synapse
+                driver: "ODBC Driver 18 for SQL Server"
+                server: "eb-outdoorlightingperspective-workspace.sql.azuresynapse.net"
+                port: 1433
+                database: "OLP"
+                schema: "DBT_SL"
+                encrypt: true
+                trust_cert: true
+                threads: 1
+                authentication: ActiveDirectoryServicePrincipal
+                client_id: "${{ secrets.AZURE_CLIENT_ID }}"
+                client_secret: "${{ secrets.AZURE_CLIENT_SECRET }}"
+                tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
+          EOL
+      - name: Run dbt tests
+        run: |
+          dbt debug --target dev
+          dbt test --target dev
+ 
